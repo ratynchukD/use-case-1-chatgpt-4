@@ -21,11 +21,23 @@ public class CountriesController : ControllerBase
     }
 
     [HttpGet(Name = "Get")]
-    public async Task<IEnumerable<Country>> Get(string filterByName, string sort, int? takeFirst = null)
+    public async Task<IEnumerable<Country>> Get(
+        string filterByName = null,
+        short? filterByPopulation = null,
+        string sort = null,
+        int? takeFirst = null)
     {
-        var result = Array.Empty<Country>();
-        var countries =  (await GetAllCountriesAsync())
-            .Where(c => filterByName != null?  c.Name.Common.Contains(filterByName, StringComparison.InvariantCultureIgnoreCase): true);
+        var countries =  await GetAllCountriesAsync();
+
+        if (filterByName != null) {
+            countries = countries.Where(c => c.Name.Common.Contains(filterByName, StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        if (filterByPopulation.HasValue) {
+            long filterCriterion = filterByPopulation.Value * 1_000_000;
+
+            countries = countries.Where(c => c.Population < filterCriterion);
+        }
 
         return countries;
     }
