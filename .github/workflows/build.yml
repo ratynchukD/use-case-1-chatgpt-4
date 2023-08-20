@@ -46,3 +46,38 @@ jobs:
           .\.sonar\scanner\dotnet-sonarscanner begin /k:"ratynchukD_use-case-1-chatgpt-4" /o:"ratynchukd" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
           dotnet build use-case-1-chatgpt-4/use-case-1-chatgpt-4.csproj
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+
+  build_and_test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0'  # Set your required .NET version here
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --no-restore
+
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+
+    - name: Setup SonarCloud scanner
+      uses: sonarsource/sonarcloud-github-action@master
+      with:
+        projectBaseDir: use-case-1-chatgpt-4/tests/use-case-1-chatgpt-4-tests/use-case-1-chatgpt-4-tests.csproj
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # Set your SonarCloud token as a secret in GitHub repo settings
+
+    - name: SonarCloud scan
+      run: sonar-scanner
+
+    - name: Publish SonarCloud results
+      run: sonar-scanner-end
