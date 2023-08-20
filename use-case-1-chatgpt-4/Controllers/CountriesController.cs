@@ -39,6 +39,13 @@ public class CountriesController : ControllerBase
             countries = countries.Where(c => c.Population < filterCriterion);
         }
 
+        if (sort.Equals("ascend", StringComparison.InvariantCultureIgnoreCase)) {
+            countries = countries.OrderBy(c => c.Name.Common);
+        }
+        else if (sort.Equals("descend", StringComparison.InvariantCultureIgnoreCase)) {
+            countries = countries.OrderByDescending(c => c.Name.Common);
+        }
+
         return countries;
     }
 
