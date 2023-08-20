@@ -29,7 +29,7 @@ public class CountriesController : ControllerBase
     {
         var countries =  await GetAllCountriesAsync();
 
-        if (filterByName != null) {
+        if (!string.IsNullOrWhiteSpace(filterByName)) {
             countries = countries.Where(c => c.Name.Common.Contains(filterByName, StringComparison.InvariantCultureIgnoreCase));
         }
 
@@ -39,11 +39,17 @@ public class CountriesController : ControllerBase
             countries = countries.Where(c => c.Population < filterCriterion);
         }
 
-        if (sort.Equals("ascend", StringComparison.InvariantCultureIgnoreCase)) {
-            countries = countries.OrderBy(c => c.Name.Common);
+        if (!string.IsNullOrWhiteSpace(sort)) {
+            if (sort.Equals("ascend", StringComparison.InvariantCultureIgnoreCase)) {
+                countries = countries.OrderBy(c => c.Name.Common);
+            }
+            else if (sort.Equals("descend", StringComparison.InvariantCultureIgnoreCase)) {
+                countries = countries.OrderByDescending(c => c.Name.Common);
+            }
         }
-        else if (sort.Equals("descend", StringComparison.InvariantCultureIgnoreCase)) {
-            countries = countries.OrderByDescending(c => c.Name.Common);
+
+        if (takeFirst.HasValue) {
+            countries = countries.Take(takeFirst.Value);
         }
 
         return countries;
