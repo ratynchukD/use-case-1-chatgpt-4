@@ -22,34 +22,55 @@ public class CountriesController : ControllerBase
 
     [HttpGet(Name = "Get")]
     public async Task<IEnumerable<Country>> Get(
-        string filterByName = null,
-        short? filterByPopulation = null,
-        string sort = null,
+        string name = null,
+        short? population = null,
+        string sortDirection = null,
         int? takeFirst = null)
     {
         var countries =  await GetAllCountriesAsync();
 
-        if (!string.IsNullOrWhiteSpace(filterByName)) {
-            countries = countries.Where(c => c.Name.Common.Contains(filterByName, StringComparison.InvariantCultureIgnoreCase));
+        countries = FilterByName(countries, name);
+        countries = FilterByPopulation(countries, population);
+        countries = SortByName(countries, sortDirection);
+        countries = Paginate(countries, takeFirst);
+
+        return countries;
+    }
+
+    private IEnumerable<Country> FilterByName(IEnumerable<Country> countries, string name){
+        if (!string.IsNullOrWhiteSpace(name)) {
+            return countries.Where(c => c.Name.Common.Contains(name, StringComparison.InvariantCultureIgnoreCase));
         }
 
-        if (filterByPopulation.HasValue) {
-            long filterCriterion = filterByPopulation.Value * 1_000_000;
+        return countries;
+    }
 
-            countries = countries.Where(c => c.Population < filterCriterion);
+    private IEnumerable<Country> FilterByPopulation(IEnumerable<Country> countries, short? population){
+        if (population.HasValue) {
+            long filterCriterion = population.Value * 1_000_000;
+
+            return countries.Where(c => c.Population < filterCriterion);
         }
 
-        if (!string.IsNullOrWhiteSpace(sort)) {
-            if (sort.Equals("ascend", StringComparison.InvariantCultureIgnoreCase)) {
-                countries = countries.OrderBy(c => c.Name.Common);
+        return countries;
+    }
+
+    private IEnumerable<Country> SortByName(IEnumerable<Country> countries, string sortDirection){
+        if (!string.IsNullOrWhiteSpace(sortDirection)) {
+            if (sortDirection.Equals("ascend", StringComparison.InvariantCultureIgnoreCase)) {
+                return countries.OrderBy(c => c.Name.Common);
             }
-            else if (sort.Equals("descend", StringComparison.InvariantCultureIgnoreCase)) {
-                countries = countries.OrderByDescending(c => c.Name.Common);
+            else if (sortDirection.Equals("descend", StringComparison.InvariantCultureIgnoreCase)) {
+                return countries.OrderByDescending(c => c.Name.Common);
             }
         }
 
+        return countries;
+    }
+
+    private IEnumerable<Country> Paginate(IEnumerable<Country> countries, int? takeFirst){
         if (takeFirst.HasValue) {
-            countries = countries.Take(takeFirst.Value);
+            return countries.Take(takeFirst.Value);
         }
 
         return countries;
