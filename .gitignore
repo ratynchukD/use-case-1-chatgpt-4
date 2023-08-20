@@ -104,6 +104,8 @@ $RECYCLE.BIN/
 
 # VS directories
 .vs/
+bin/
+obj/
 
 # Rider
 .idea/
