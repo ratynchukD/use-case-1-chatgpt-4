@@ -21,9 +21,13 @@ public class CountriesController : ControllerBase
     }
 
     [HttpGet(Name = "Get")]
-    public async Task<IEnumerable<Country>> Get(string filterBy, string sortBy, int takeFirst)
+    public async Task<IEnumerable<Country>> Get(string filterByName, string sort, int? takeFirst = null)
     {
-        return await GetAllCountriesAsync();
+        var result = Array.Empty<Country>();
+        var countries =  (await GetAllCountriesAsync())
+            .Where(c => filterByName != null?  c.Name.Common.Contains(filterByName, StringComparison.InvariantCultureIgnoreCase): true);
+
+        return countries;
     }
 
     private async Task<IEnumerable<Country>> GetAllCountriesAsync()
