@@ -21,6 +21,14 @@ public class CountriesController : ControllerBase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Returns countries from by defined parameters.
+    /// </summary>
+    /// <param name="name">Part of the country common name.</param>
+    /// <param name="population">A number (in millions) that defines the population threshold under which countries are returned.</param>
+    /// <param name="sortDirection">Order in which countries are sorted by their common name.</param>
+    /// <param name="takeFirst">A number which defines a limit of countries to return.</param>
+    /// <returns>Countries by defined parameters.</returns>
     [HttpGet(Name = "Get")]
     public async Task<IEnumerable<Country>> Get(
         string name = null,
